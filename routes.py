@@ -1,16 +1,22 @@
-from fastapi import APIRouter
-from models import UserResponse
+from fastapi import APIRouter, HTTPException
+from models import UserGreeting, SimpleMessage, User
 
 router = APIRouter()
 
-@router.get("/", response_model=UserResponse)
+@router.get("/", response_model=SimpleMessage)
 def read_root():
-    return UserResponse(message="Hello, FastAPI!")
+    return SimpleMessage(message="Hello, FastAPI!")
 
-@router.get("/status", response_model=UserResponse)
+@router.get("/status", response_model=SimpleMessage)
 def read_status():
-    return UserResponse(message="O servidor está funcionando!")
+    return SimpleMessage(message="O servidor está funcionando!")
 
-@router.get("/user/{username}", response_model=UserResponse)
+@router.get("/user/{username}", response_model=UserGreeting)
 def read_user(username: str):
-    return UserResponse(message=f"Olá, {username}!")
+    if len(username) < 3:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return UserGreeting(username=username, message=f"Welcome, {username}!")
+
+@router.post("/create-user", response_model=User)
+def create_user(user: User):
+    return user
